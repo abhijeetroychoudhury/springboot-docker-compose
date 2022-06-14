@@ -11,7 +11,7 @@ pipeline{
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "localhost:8081"
-        NEXUS_REPOSITORY = "webapp-repo"
+        NEXUS_REPOSITORY = "springboot-app-repo"
         NEXUS_CREDENTIAL_ID = "nexus"
         // MVNHOME = tool name: 'Maven_3.8.5', type: 'maven'
         // MVNCOMMAND = "${mvnhome}/bin/mvn"
@@ -20,9 +20,9 @@ pipeline{
     stage ('SCM Checkout'){
       steps{
         script{
-        git branch: 'abhijeet_roy', 
+        git branch: 'main', 
         credentialsId: 'github-personal', 
-        url: 'https://github.com/abhijeetroychoudhury/.git'
+        url: 'https://github.com/abhijeetroychoudhury/springboot-docker-compose.git'
       }
     }
     }
@@ -119,30 +119,11 @@ pipeline{
                 }
             }
         }
-    
-    // stage ('Pushing war to Nexus'){
-    //   steps{
-    //     script{
-    //       nexusArtifactUploader artifacts: [[
-    //         artifactId: 'webapp', 
-    //         classifier: '', 
-    //         file: 'target/webapp.war', 
-    //         type: 'war']], 
-    //         credentialsId: 'nexus', 
-    //         groupId: 'com.example.maven-project', 
-    //         nexusUrl: 'localhost:8081', 
-    //         nexusVersion: 'nexus3', 
-    //         protocol: 'http', 
-    //         repository: 'webapp-repo', 
-    //         version: '1.0-SNAPSHOT'
-    //       }
-    //     }
-    //   }
 
     stage ('building docker image'){
       steps{
         script{
-        bat 'docker build --compress -t abhi96dock/my-app-2:1.0 .'
+        bat 'docker build --compress -t abhi96dock/springbooot-app:0.1 .'
     }
       }
     }
@@ -151,7 +132,7 @@ pipeline{
         script{
         withCredentials([string(credentialsId: 'docker-pwd', variable: 'pwd')]) {
         bat "docker login -u abhi96dock -p ${pwd}"
-        bat 'docker push abhi96dock/my-app-2:1.0'
+        bat 'docker push abhi96dock/springbooot-app:0.1'
         }
         }
       }
@@ -161,7 +142,7 @@ pipeline{
    stage('Run Container with application'){
      steps{
        script{
-          bat 'docker run -p 8090:8080 -d --name hello-code-demo abhi96dock/my-app-2:1.0'
+          bat 'docker-compose up -d'
        }
      }     
    }
